@@ -1,14 +1,13 @@
 package lox;
 
-enum TokenType
-{
+enum TokenType {
     // Grouping
     LPAREN, RPAREN, SEMI_COLON, LBRACE, RBRACE, COMMA, DOT,
     // Arithmetic
     PLUS, MINUS, MUL, DIV, ASSIGN, MOD, EXP,
 
     // Logical
-    EQUALS, NOT_EQUALS, GREATER, GREATER_EQUALS, LESSER, 
+    EQUALS, NOT_EQUALS, GREATER, GREATER_EQUALS, LESSER,
     LESSER_EQUALS,
 
     // Boolean
@@ -21,7 +20,7 @@ enum TokenType
     ID, STRING, NUMBER,
 
     // Reserved words
-    IF, ELSE, LET, DEFINE, FOR, WHILE, DO, RETURN, 
+    IF, ELSE, LET, DEFINE, FOR, WHILE, DO, RETURN,
     TRUE, FALSE, NIL, BREAK, CONTINUE, PRINT, CLASS,
     SUPER, SELF, QUESTION, COLON, SWITCH, CASE, DEFAULT,
 

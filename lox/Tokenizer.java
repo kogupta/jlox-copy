@@ -5,69 +5,61 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class Tokenizer
-{
+class Tokenizer {
     private final String source;
     private final List<Token> tokens;
     private int line, col, begin, curr;
     private static final Map<String, TokenType> keywords;
 
-    static
-    {
-        keywords = new HashMap<>();  
-        keywords.put("not", TokenType.NOT);                      
+    static {
+        keywords = new HashMap<>();
+        keywords.put("not", TokenType.NOT);
         keywords.put("and", TokenType.AND);
-        keywords.put("or", TokenType.OR);      
-        keywords.put("if", TokenType.IF);      
-        keywords.put("else", TokenType.ELSE);                                                          
-        keywords.put("true", TokenType.TRUE);                                           
+        keywords.put("or", TokenType.OR);
+        keywords.put("if", TokenType.IF);
+        keywords.put("else", TokenType.ELSE);
+        keywords.put("true", TokenType.TRUE);
         keywords.put("false", TokenType.FALSE);
-        keywords.put("let", TokenType.LET);                                            
-        keywords.put("for", TokenType.FOR);                       
+        keywords.put("let", TokenType.LET);
+        keywords.put("for", TokenType.FOR);
         keywords.put("do", TokenType.DO);
         keywords.put("while", TokenType.WHILE);
-        keywords.put("nil", TokenType.NIL);                       
-        keywords.put("define", TokenType.DEFINE);                       
-        keywords.put("break", TokenType.BREAK);                       
-        keywords.put("continue", TokenType.CONTINUE);                       
-        keywords.put("print", TokenType.PRINT);                     
+        keywords.put("nil", TokenType.NIL);
+        keywords.put("define", TokenType.DEFINE);
+        keywords.put("break", TokenType.BREAK);
+        keywords.put("continue", TokenType.CONTINUE);
+        keywords.put("print", TokenType.PRINT);
         keywords.put("return", TokenType.RETURN);
-        keywords.put("class", TokenType.CLASS);                    
-        keywords.put("super", TokenType.SUPER);                    
-        keywords.put("self", TokenType.SELF);                      
-        keywords.put("switch", TokenType.SWITCH);                      
-        keywords.put("case", TokenType.CASE);                      
-        keywords.put("default", TokenType.DEFAULT);                      
+        keywords.put("class", TokenType.CLASS);
+        keywords.put("super", TokenType.SUPER);
+        keywords.put("self", TokenType.SELF);
+        keywords.put("switch", TokenType.SWITCH);
+        keywords.put("case", TokenType.CASE);
+        keywords.put("default", TokenType.DEFAULT);
     }
-    
-    Tokenizer(String source)
-    {
+
+    Tokenizer(String source) {
         this.source = source;
         this.tokens = new ArrayList<Token>();
         this.begin = this.curr = this.col = 0;
         this.line = 1;
     }
 
-    List<Token> getTokens()
-    {
+    List<Token> getTokens() {
         return tokens;
     }
 
-    public void scanTokens()
-    {
-        while(!atEnd())
-        {
+    public void scanTokens() {
+        while (!atEnd()) {
             begin = curr;
             nextToken();
         }
-        tokens.add(new Token(TokenType.END, null, "EOF", line, col+1));
+        tokens.add(new Token(TokenType.END, null, "EOF", line, col + 1));
     }
 
-    private void nextToken()
-    {
+    private void nextToken() {
         char c = consume();
-        switch(c)
-        {
+        switch (c) {
             case '(':
                 addToken(TokenType.LPAREN);
                 break;
@@ -93,12 +85,9 @@ class Tokenizer
                 addToken(TokenType.MINUS);
                 break;
             case '/':
-                if(match('*'))
-                {
+                if (match('*')) {
                     handleMultiComments();
-                }
-                else
-                {
+                } else {
                     addToken(TokenType.DIV);
                 }
                 break;
@@ -121,12 +110,9 @@ class Tokenizer
                 addToken(TokenType.BIT_XOR);
                 break;
             case '*':
-                if(match('*'))
-                {
+                if (match('*')) {
                     addToken(TokenType.EXP);
-                }
-                else
-                {
+                } else {
                     addToken(TokenType.MUL);
                 }
                 break;
@@ -134,43 +120,31 @@ class Tokenizer
                 addToken(TokenType.QUESTION);
                 break;
             case ':':
-                if(match('='))
-                {
+                if (match('=')) {
                     addToken(TokenType.ASSIGN);
-                }
-                else
-                {
+                } else {
                     // Lox.error(line, col, "Unexpected char");
                     addToken(TokenType.COLON);
                 }
                 break;
             case '!':
-                if(match('='))
-                {
+                if (match('=')) {
                     addToken(TokenType.NOT_EQUALS);
-                }
-                else
-                {
-                    Lox.error(line, col,"Unexpected char");
+                } else {
+                    Lox.error(line, col, "Unexpected char");
                 }
                 break;
             case '>':
-                if(match('='))
-                {
+                if (match('=')) {
                     addToken(TokenType.GREATER_EQUALS);
-                }
-                else
-                {
+                } else {
                     addToken(TokenType.GREATER);
                 }
                 break;
             case '<':
-                if(match('='))
-                {
+                if (match('=')) {
                     addToken(TokenType.LESSER_EQUALS);
-                }
-                else
-                {
+                } else {
                     addToken(TokenType.LESSER);
                 }
                 break;
@@ -192,155 +166,116 @@ class Tokenizer
                 col = 0;
                 break;
             default:
-                if(Character.isDigit(c))
-                {
+                if (Character.isDigit(c)) {
                     handleNumber();
-                }
-                else if(Character.isLetter(c) || c == '_')
-                {
+                } else if (Character.isLetter(c) || c == '_') {
                     handleIdentifier();
-                }
-                else
-                {
+                } else {
                     Lox.error(line, col, "Unknown symbol");
                 }
         }
     }
 
-    private void handleMultiComments()
-    {
-        while(true)
-        {
-            if(atEnd())
-            {
-                Lox.error(line, col, "unterminated  comment"); 
-                return;              
+    private void handleMultiComments() {
+        while (true) {
+            if (atEnd()) {
+                Lox.error(line, col, "unterminated  comment");
+                return;
             }
-            if(peek() == '/')
-            {
+            if (peek() == '/') {
                 consume();
-                if(match('*'))
-                {
+                if (match('*')) {
                     handleMultiComments();
                 }
-            }
-            else if(peek() == '*')
-            {
+            } else if (peek() == '*') {
                 consume();
-                if(match('/'))
-                {
+                if (match('/')) {
                     return;
                 }
-            }
-            else if(peek() == '\n')
-            {
+            } else if (peek() == '\n') {
                 line++;
                 col = 0;
             }
-            if(!atEnd())
-            {
+            if (!atEnd()) {
                 consume();
             }
         }
     }
 
-    private void handleComments()
-    {
-        while(!atEnd())
-        {
-            if(peek() == '\n')
-            {
+    private void handleComments() {
+        while (!atEnd()) {
+            if (peek() == '\n') {
                 break;
             }
             consume();
         }
     }
 
-    private void handleIdentifier()
-    {
-        while(Character.isLetterOrDigit(peek()) || peek() == '_')
-        {
+    private void handleIdentifier() {
+        while (Character.isLetterOrDigit(peek()) || peek() == '_') {
             consume();
         }
         String lexeme = source.substring(begin, curr);
-        TokenType type = keywords.get(lexeme); 
-        if(type == null)
-        {
+        TokenType type = keywords.get(lexeme);
+        if (type == null) {
             addToken(TokenType.ID, lexeme);
-        }
-        else
-        {
+        } else {
             addToken(type);
         }
     }
 
-    private void handleStrings()
-    {
-        while(peek() != '"')
-        {
-            if(atEnd() || peek() == '\n')
-            {
+    private void handleStrings() {
+        while (peek() != '"') {
+            if (atEnd() || peek() == '\n') {
                 Lox.error(line, col, "Unterminated String ");
                 break;
             }
             consume();
         }
         consume();
-        String lexeme = source.substring(begin+1, curr-1);
+        String lexeme = source.substring(begin + 1, curr - 1);
         addToken(TokenType.STRING, lexeme);
     }
 
-    private void handleNumber()
-    {
-        while(Character.isDigit(peek()))
-        {
+    private void handleNumber() {
+        while (Character.isDigit(peek())) {
             consume();
         }
-        if(peek() == '.' && Character.isDigit(peekNext()))
-        {
+        if (peek() == '.' && Character.isDigit(peekNext())) {
             consume();
         }
-        while(Character.isDigit(peek()))
-        {
+        while (Character.isDigit(peek())) {
             consume();
         }
         double val = Double.parseDouble(source.substring(begin, curr));
         addToken(TokenType.NUMBER, val);
     }
 
-    private void addToken(TokenType type) 
-    {                
-        addToken(type, null);                                
-    } 
-
-    private void addToken(TokenType type, Object literal) 
-    {
-        String lexeme = source.substring(begin, curr);      
-        tokens.add(new Token(type, lexeme, literal, line, col));    
+    private void addToken(TokenType type) {
+        addToken(type, null);
     }
 
-    private char peekNext()
-    {
-        if(curr + 1 >= source.length())
-        {
+    private void addToken(TokenType type, Object literal) {
+        String lexeme = source.substring(begin, curr);
+        tokens.add(new Token(type, lexeme, literal, line, col));
+    }
+
+    private char peekNext() {
+        if (curr + 1 >= source.length()) {
             return '\0';
         }
-        return source.charAt(curr+1);
+        return source.charAt(curr + 1);
     }
 
-    private char peek()
-    {
-        if(atEnd())
-        {
+    private char peek() {
+        if (atEnd()) {
             return '\0';
         }
         return source.charAt(curr);
     }
 
-    private boolean match(char expected)
-    {
-        if(atEnd() || source.charAt(curr) != expected)
-        {
+    private boolean match(char expected) {
+        if (atEnd() || source.charAt(curr) != expected) {
             return false;
         }
         curr++;
@@ -348,15 +283,13 @@ class Tokenizer
         return true;
     }
 
-    private char consume()
-    {
+    private char consume() {
         curr++;
         col++;
-        return source.charAt(curr-1);
+        return source.charAt(curr - 1);
     }
 
-    private boolean atEnd()
-    {
+    private boolean atEnd() {
         return curr >= source.length();
     }
 }

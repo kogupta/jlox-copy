@@ -1,20 +1,17 @@
 package lox;
 
-enum LoopType
-{
+enum LoopType {
     NONE, LOOP, SWITCH
 }
 
-enum JumpType
-{
+enum JumpType {
     BREAK, CONTINUE
 }
 
-class Jump extends RuntimeException
-{
+class Jump extends RuntimeException {
     JumpType type;
-    Jump(JumpType type)
-    {
+
+    Jump(JumpType type) {
         super(null, null, false, false);
         this.type = type;
     }
