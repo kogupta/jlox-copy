@@ -141,8 +141,8 @@ class Parser {
                 if (!match(TokenType.STRING, TokenType.NUMBER, TokenType.TRUE, TokenType.FALSE, TokenType.NIL)) {
                     error(peek(), "Case expressions must be constants.");
                 }
-                Object val = previous().literal;
-                if (exprs.indexOf(val) != -1) {
+                Object val = previous().literal();
+                if (exprs.contains(val)) {
                     error(peek(), "Case expressions must be unique.");
                 }
                 consume(TokenType.COLON, "Expect ':' after case.");
@@ -153,7 +153,7 @@ class Parser {
                 exprs.add(val);
                 branches.add(toDo);
             } else if (match(TokenType.DEFAULT)) {
-                if (exprs.indexOf("default") != -1) {
+                if (exprs.contains("default")) {
                     error(peek(), "Duplicate default stmt.");
                 }
                 consume(TokenType.COLON, "Expect ':' after case.");
@@ -277,8 +277,7 @@ class Parser {
             if (expr instanceof Expr.Variable) {
                 Token name = ((Expr.Variable) expr).name;
                 return new Expr.Assign(name, value);
-            } else if (expr instanceof Expr.Get) {
-                Expr.Get get = (Expr.Get) expr;
+            } else if (expr instanceof Expr.Get get) {
                 return new Expr.Set(get.name, get.object, value);
             }
             error(equals, "Invalid assignment target.");
@@ -454,7 +453,7 @@ class Parser {
         } else if (match(TokenType.NIL)) {
             expr = new Expr.Literal(null);
         } else if (match(TokenType.NUMBER, TokenType.STRING)) {
-            expr = new Expr.Literal(previous().literal);
+            expr = new Expr.Literal(previous().literal());
         } else if (match(TokenType.LPAREN)) {
             Expr grp = expression();
             consume(TokenType.RPAREN, "Unmatched ')'");
@@ -490,10 +489,10 @@ class Parser {
     private void sync() {
         advance();
         while (!atEnd()) {
-            if (previous().type == TokenType.SEMI_COLON) {
+            if (previous().type() == TokenType.SEMI_COLON) {
                 return;
             }
-            switch (peek().type) {
+            switch (peek().type()) {
                 // Enums don't need to be qualified in switch cases apparently
                 case CLASS:
                 case DEFINE:
@@ -527,7 +526,7 @@ class Parser {
         if (atEnd()) {
             return false;
         }
-        return peek().type == expected;
+        return peek().type() == expected;
     }
 
     private Token advance() {
@@ -538,7 +537,7 @@ class Parser {
     }
 
     private boolean atEnd() {
-        return peek().type == TokenType.END;
+        return peek().type() == TokenType.END;
     }
 
     private Token peek() {
